@@ -1,73 +1,82 @@
-# Welcome to your Lovable project
+# Mindful Echo
 
-## Project info
+**Mindful Echo** is a voice-powered mental health companion designed to help users process thoughts, meditate, and track their well-being consistency through gamification.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+![Mindful Echo Hero](./public/lovable-uploads/27118204-6379-43c3-ae62-c0acc400c497.png)
 
-## How can I edit this code?
+## 🌟 Features
 
-There are several ways of editing your application.
+### 🎙️ Voice Companion
+- **Real-time Interaction**: Talk to the AI naturally.
+- **Smart Orb**: A visual voice activity indicator that reacts to speaking and listening states.
 
-**Use Lovable**
+### 🧘‍♂️ Mindfulness Tools
+- **Guided Meditations**: Sessions for anxiety, focus, and sleep.
+- **Breathing Exercises**: Interactive Box Breathing visualizer.
+- **Grounding**: 5-4-3-2-1 Senses Grounding technique.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### 🏆 Gamification & Progress (New!)
+- **Streak Counter**: Track consecutive days of mindfulness.
+- **Yearly Heatmap**: GitHub-style activity graph for the last 365 days.
+- **Badges**: Unlock achievements like "On Fire" (3-day streak) and "Zen Master".
+- **Unlockable Themes**: 
+    - 🌿 **Mint**: Default
+    - 🌅 **Sunset**: Unlock with 3-day streak.
+    - 🌊 **Ocean**: Unlock with 7-day streak.
+    - 🌌 **Cosmic**: Unlock with 30-day streak.
+- **Shareable Stats**: Generate beautiful images of your streaks to share on social media.
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🛠️ Tech Stack
 
-**Use your preferred IDE**
+- **Frontend**: React, TypeScript, Vite
+- **UI Framework**: Tailwind CSS, shadcn/ui
+- **Backend/Db**: Supabase
+- **AI/Voice**: ElevenLabs, Google Gemini (integration ready)
+- **State Management**: React Query
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Getting Started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
+- Node.js (v18+)
+- Supabase Account
 
-Follow these steps:
+### Installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/yourusername/mindful-echo.git
+    cd mindful-echo
+    ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3.  **Environment Setup**:
+    Create a `.env` file in the root directory:
+    ```env
+    VITE_SUPABASE_URL=your_supabase_url
+    VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+    # Add other API keys as needed (Gemini, ElevenLabs)
+    ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+4.  **Run Locally**:
+    ```bash
+    npm run dev
+    ```
 
-**Edit a file directly in GitHub**
+## 📦 Deployment
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+This project is optimized for deployment on **Vercel**.
 
-**Use GitHub Codespaces**
+1.  Import project to Vercel.
+2.  Add Environment Variables from your `.env` file.
+3.  Deploy!
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🤝 Contributing
 
-## What technologies are used for this project?
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
+*Finding peace, one voice at a time.*
