@@ -1,0 +1,25 @@
+project_id = "xlmgybprnmknxekwmdif"
+
+[functions.rag-assessment]
+verify_jwt = false
+
+[functions.companion-tts]
+verify_jwt = false
+
+[functions.companion-chat]
+verify_jwt = false
+
+[functions.companion-stt]
+verify_jwt = false
+
+[functions.elevenlabs-scribe-token]
+verify_jwt = false
+
+[functions.content-guardrails]
+verify_jwt = false
+
+[functions.voice-assessment]
+verify_jwt = false
+
+[functions.meditation-tts]
+verify_jwt = false
