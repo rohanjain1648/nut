@@ -8,7 +8,7 @@ interface FeatureCardProps {
 }
 
 const FeatureCard = ({ icon, title, description, delay = 0 }: FeatureCardProps) => (
-  <div 
+  <div
     className="group p-6 rounded-2xl bg-card border border-border/50 shadow-card hover:shadow-float transition-all duration-500 hover:-translate-y-1"
     style={{ animationDelay: `${delay}ms` }}
   >
@@ -30,7 +30,7 @@ export const FeaturesSection = () => {
     {
       icon: <Brain className="w-6 h-6" />,
       title: "RAG-Powered Intelligence",
-      description: "Advanced retrieval-augmented generation ensures responses are grounded in validated ADHD research and strategies.",
+      description: "Advanced retrieval-augmented generation ensures responses are grounded in validated mental health research and strategies.",
     },
     {
       icon: <BarChart3 className="w-6 h-6" />,
@@ -50,7 +50,7 @@ export const FeaturesSection = () => {
     {
       icon: <Sparkles className="w-6 h-6" />,
       title: "Personalized Toolkit",
-      description: "Access grounding exercises and ADHD task-anchoring prompts customized to your unique needs and preferences.",
+      description: "Access grounding exercises and mental health task-anchoring prompts customized to your unique needs and preferences.",
     },
   ];
 
@@ -58,7 +58,7 @@ export const FeaturesSection = () => {
     <section id="features" className="py-24 px-6 bg-background relative overflow-hidden">
       {/* Subtle background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-secondary/30 to-background pointer-events-none" />
-      
+
       <div className="container mx-auto max-w-6xl relative z-10">
         <div className="text-center mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
@@ -69,7 +69,7 @@ export const FeaturesSection = () => {
             <span className="text-gradient"> Mental Wellness</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Our comprehensive platform combines cutting-edge AI with evidence-based ADHD strategies 
+            Our comprehensive platform combines cutting-edge AI with evidence-based mental health strategies
             to provide personalized support at every step of your journey.
           </p>
         </div>

@@ -9,7 +9,7 @@ const steps = [
     color: "from-primary to-primary-glow",
   },
   {
-    number: "02", 
+    number: "02",
     title: "Sentiment Analysis",
     description: "Our AI analyzes your emotional patterns and responses to generate a comprehensive wellness report.",
     icon: <FileText className="w-6 h-6" />,
@@ -18,7 +18,7 @@ const steps = [
   {
     number: "03",
     title: "Personalized Journey",
-    description: "Continue with your AI companion who remembers your experiences and guides you through ADHD strategies.",
+    description: "Continue with your AI companion who remembers your experiences and guides you through mental health strategies.",
     icon: <Sparkles className="w-6 h-6" />,
     color: "from-accent-foreground to-accent-foreground/80",
   },
@@ -37,7 +37,7 @@ export const HowItWorksSection = () => {
             <span className="text-gradient"> Mental Clarity</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Three simple steps to begin your personalized ADHD support experience with our voice-first platform.
+            Three simple steps to begin your personalized mental health support experience with our voice-first platform.
           </p>
         </div>
 
