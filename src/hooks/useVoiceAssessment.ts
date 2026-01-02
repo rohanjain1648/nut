@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 // Type declarations for Web Speech API
 interface SpeechRecognitionEvent extends Event {
@@ -83,7 +82,6 @@ export const useVoiceAssessment = () => {
   const lastFinalTimestampRef = useRef<number>(0);
 
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   // Browser TTS fallback when ElevenLabs is unavailable
   const speakWithBrowserTTS = useCallback((text: string): Promise<void> => {
@@ -561,41 +559,7 @@ export const useVoiceAssessment = () => {
     setStatus('idle');
   }, [stopAudio, stopListening]);
 
-  const generateReport = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-assessment`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          },
-          body: JSON.stringify({
-            action: 'generate_report',
-            messages: messagesRef.current,
-            sessionId: sessionIdRef.current,
-          }),
-        }
-      );
 
-      if (!response.ok) {
-        throw new Error('Failed to generate report');
-      }
-
-      const report = await response.json();
-      sessionStorage.setItem('assessmentReport', JSON.stringify(report));
-      navigate('/report');
-
-    } catch (err) {
-      console.error('Generate report error:', err);
-      toast({
-        title: 'Error',
-        description: 'Failed to generate report. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  }, [navigate, toast]);
 
   return {
     status,
@@ -617,6 +581,5 @@ export const useVoiceAssessment = () => {
     stopAudio,
     startListening,
     stopListening,
-    generateReport,
   };
 };

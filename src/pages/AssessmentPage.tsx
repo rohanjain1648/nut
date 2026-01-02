@@ -27,7 +27,6 @@ const AssessmentPage = () => {
     startSession,
     endSession,
     resetSession,
-    generateReport,
     startListening,
   } = useVoiceAssessment();
 
@@ -62,10 +61,7 @@ const AssessmentPage = () => {
             </div>
             <div className="flex flex-col gap-3">
               {transcript.length > 0 && (
-                <Button variant="hero" size="lg" onClick={generateReport}>
-                  <FileText className="w-4 h-4 mr-2" />
-                  View Report
-                </Button>
+                <></>
               )}
               <Button variant="outline" size="lg" onClick={resetSession}>
                 <RotateCcw className="w-4 h-4 mr-2" />
@@ -286,7 +282,7 @@ const AssessmentPage = () => {
             {isComplete ? (
               <>
                 <p className="text-lg font-medium text-foreground">Assessment Complete!</p>
-                <p className="text-sm text-muted-foreground">Would you like to view your detailed report?</p>
+                <p className="text-sm text-muted-foreground"></p>
               </>
             ) : (
               <>
@@ -329,17 +325,10 @@ const AssessmentPage = () => {
                   Start Speaking
                 </Button>
               )}
-              {isComplete ? (
-                <Button variant="hero" size="lg" onClick={generateReport}>
-                  <FileText className="w-4 h-4 mr-2" />
-                  View Report
-                </Button>
-              ) : (
-                <Button variant="destructive" size="lg" onClick={endSession}>
-                  <MicOff className="w-4 h-4 mr-2" />
-                  End Session
-                </Button>
-              )}
+              <Button variant={isComplete ? "hero" : "destructive"} size="lg" onClick={endSession}>
+                <MicOff className="w-4 h-4 mr-2" />
+                {isComplete ? "Complete Session" : "End Session"}
+              </Button>
             </div>
           </div>
         </div>

@@ -8,7 +8,7 @@ import Index from "./pages/Index";
 import HistoryPage from "./pages/HistoryPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import AssessmentPage from "./pages/AssessmentPage";
-import ReportPage from "./pages/ReportPage";
+
 import CompanionPage from "./pages/CompanionPage";
 import MeditationPage from "./pages/MeditationPage";
 import BoxBreathingPage from "./pages/BoxBreathingPage";
@@ -40,7 +40,7 @@ const App = () => (
             <Route path="/login" element={<AuthPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
             <Route path="/assessment" element={<AssessmentPage />} />
-            <Route path="/report" element={<ReportPage />} />
+
             <Route path="/companion" element={<CompanionPage />} />
             <Route path="/meditation" element={<MeditationPage />} />
             <Route path="/box-breathing" element={<BoxBreathingPage />} />
