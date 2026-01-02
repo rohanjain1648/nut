@@ -55,7 +55,7 @@ const AssessmentPage = () => {
             <div>
               <h2 className="text-2xl font-display font-bold text-foreground">Session Ended</h2>
               <p className="text-muted-foreground mt-2">
-                {transcript.length > 0 
+                {transcript.length > 0
                   ? `You completed ${Math.floor(transcript.length / 2)} exchanges.`
                   : 'Your session was ended.'}
               </p>
@@ -243,8 +243,8 @@ const AssessmentPage = () => {
             <div className={cn(
               'px-3 py-1.5 rounded-full text-xs font-medium',
               isAssistantSpeaking ? 'bg-primary/20 text-primary' :
-              isUserSpeaking ? 'bg-accent/20 text-accent-foreground' :
-              'bg-muted text-muted-foreground'
+                isUserSpeaking ? 'bg-accent/20 text-accent-foreground' :
+                  'bg-muted text-muted-foreground'
             )}>
               {isAssistantSpeaking ? 'Assistant Speaking' : isUserSpeaking ? 'Listening...' : 'Ready'}
             </div>
@@ -291,14 +291,14 @@ const AssessmentPage = () => {
             ) : (
               <>
                 <p className="text-lg font-medium text-foreground">
-                  {isAssistantSpeaking ? 'Nutrail is speaking...' : 
-                   isUserSpeaking ? 'Listening to you...' : 
-                   'Speak when ready'}
+                  {isAssistantSpeaking ? 'Nutrail is speaking...' :
+                    isUserSpeaking ? 'Listening to you...' :
+                      'Speak when ready'}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {isAssistantSpeaking ? 'Wait for the question to complete' :
-                   isUserSpeaking ? 'I can hear you' :
-                   'Speak naturally to respond'}
+                    isUserSpeaking ? 'I can hear you' :
+                      'Speak naturally to respond'}
                 </p>
               </>
             )}

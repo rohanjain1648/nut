@@ -49,7 +49,7 @@
     --gradient-hero: linear-gradient(135deg, hsl(175 50% 40%), hsl(190 45% 50%));
     --gradient-calm: linear-gradient(180deg, hsl(160 20% 97%), hsl(170 25% 94%));
     --gradient-warm: linear-gradient(135deg, hsl(175 40% 45%), hsl(150 35% 45%));
-    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
     --gradient-voice: radial-gradient(circle, hsl(175 60% 60% / 0.3), transparent 70%);
 
     /* Shadows */
@@ -105,7 +105,7 @@
     --gradient-hero: linear-gradient(135deg, hsl(175 55% 45%), hsl(190 50% 40%));
     --gradient-calm: linear-gradient(180deg, hsl(200 25% 8%), hsl(200 25% 12%));
     --gradient-warm: linear-gradient(135deg, hsl(175 45% 40%), hsl(150 40% 35%));
-    --gradient-glass: linear-gradient(135deg, rgba(30,40,45,0.9), rgba(30,40,45,0.6));
+    --gradient-glass: linear-gradient(135deg, rgba(30, 40, 45, 0.9), rgba(30, 40, 45, 0.6));
     --gradient-voice: radial-gradient(circle, hsl(175 60% 50% / 0.25), transparent 70%);
 
     --shadow-soft: 0 4px 20px -4px hsl(175 30% 10% / 0.4);
@@ -158,7 +158,7 @@
     --ring: 15 80% 60%;
     --gradient-hero: linear-gradient(135deg, hsl(15 80% 60%), hsl(330 60% 60%));
   }
-  
+
   /* Ocean Theme (Deep Blues) */
   .ocean {
     --background: 210 50% 98%;
@@ -211,7 +211,12 @@
     font-family: 'DM Sans', system-ui, sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Outfit', system-ui, sans-serif;
   }
 }
@@ -259,10 +264,13 @@
 
   /* Voice pulse animation */
   @keyframes voice-pulse {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: scale(1);
       opacity: 0.6;
     }
+
     50% {
       transform: scale(1.15);
       opacity: 0.3;
@@ -270,18 +278,24 @@
   }
 
   @keyframes voice-wave {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: scaleY(0.3);
     }
+
     50% {
       transform: scaleY(1);
     }
   }
 
   @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
       transform: translateY(0);
     }
+
     50% {
       transform: translateY(-10px);
     }
@@ -292,6 +306,7 @@
       opacity: 0;
       transform: translateY(20px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -302,6 +317,7 @@
     0% {
       background-position: -200% 0;
     }
+
     100% {
       background-position: 200% 0;
     }
@@ -324,12 +340,10 @@
   }
 
   .animate-shimmer {
-    background: linear-gradient(
-      90deg,
-      hsl(var(--primary) / 0.1) 0%,
-      hsl(var(--primary) / 0.3) 50%,
-      hsl(var(--primary) / 0.1) 100%
-    );
+    background: linear-gradient(90deg,
+        hsl(var(--primary) / 0.1) 0%,
+        hsl(var(--primary) / 0.3) 50%,
+        hsl(var(--primary) / 0.1) 100%);
     background-size: 200% 100%;
     animation: shimmer 2s ease-in-out infinite;
   }

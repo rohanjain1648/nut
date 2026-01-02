@@ -34,7 +34,7 @@ export const HeroSection = () => {
 
             {/* Main Headline */}
             <h1
-              className="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1] animate-fade-in-up"
+              className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1] animate-fade-in-up"
               style={{ animationDelay: "100ms" }}
             >
               Your Voice-First

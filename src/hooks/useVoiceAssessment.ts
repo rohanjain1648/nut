@@ -1,4 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 // Type declarations for Web Speech API
 interface SpeechRecognitionEvent extends Event {
@@ -28,8 +30,6 @@ declare global {
     webkitSpeechRecognition: new () => SpeechRecognition;
   }
 }
-import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 export type SessionStatus = 'idle' | 'connecting' | 'active' | 'ended' | 'error';
 
@@ -356,23 +356,44 @@ export const useVoiceAssessment = () => {
           const trimmedText = text.trim();
           const now = Date.now();
 
-          // Deduplication Logic:
-          // 1. Check if the text is identical to the last processed text
-          // 2. Check if it happened within a short window (e.g., 2 seconds) which suggests an echo
-          const isDuplicate = trimmedText.toLowerCase() === lastFinalTranscriptRef.current.toLowerCase();
-          const isRecent = (now - lastFinalTimestampRef.current) < 2000;
+          const lastText = lastFinalTranscriptRef.current.toLowerCase();
+          const currentText = trimmedText.toLowerCase();
 
-          if (isDuplicate && isRecent) {
-            console.log('[VoiceAssessment] Ignored duplicate segment (likely echo):', trimmedText);
-          } else {
+          // Deduplication & Android Fix:
+          // 1. Exact duplicate: Ignore.
+          // 2. Substring (Retroactive): If new text is SHORTER and contained in old, it's a glitched echo. Ignore.
+          // 3. Growing Text (Progressive): If new text CONTAINS old text as a prefix (e.g. "Hello" -> "Hello World"), 
+          //    it means the engine 'refinalized'. We must REPLACE the last chunk in finalTranscript.
+
+          const isDuplicate = currentText === lastText;
+          const isRetroactiveEcho = lastText.includes(currentText) && lastText.length > currentText.length;
+          // Check if current text starts with last text (and last text wasn't empty) => Growing text bug
+          const isGrowingText = lastText.length > 0 && currentText.startsWith(lastText);
+
+          const isRecent = (now - lastFinalTimestampRef.current) < 2500;
+
+          if ((isDuplicate || isRetroactiveEcho) && isRecent) {
+            console.log('[VoiceAssessment] Ignored duplicate/echo:', trimmedText);
+          } else if (isGrowingText && isRecent) {
+            console.log('[VoiceAssessment] Detected growing text update, replacing last chunk...');
+            // Remove the last added chunk from finalTranscript and append the new, longer one
+            // We assume 'finalTranscript' ends with ' '
+            const lastChunkLen = lastFinalTranscriptRef.current.length + 1; // +1 for the space we added
+            if (finalTranscript.length >= lastChunkLen) {
+              finalTranscript = finalTranscript.slice(0, -lastChunkLen);
+            }
             finalTranscript += text + ' ';
             lastFinalTranscriptRef.current = trimmedText;
             lastFinalTimestampRef.current = now;
-            console.log('[VoiceAssessment] Final transcript:', text);
+          } else {
+            // Normal append
+            finalTranscript += text + ' ';
+            lastFinalTranscriptRef.current = trimmedText;
+            lastFinalTimestampRef.current = now;
+            console.log('[VoiceAssessment] Appended final chunk:', trimmedText);
           }
         } else {
-          interim += text;
-          console.log('[VoiceAssessment] Interim:', text);
+          // interim ignored
         }
       }
 
@@ -380,17 +401,17 @@ export const useVoiceAssessment = () => {
       clearTimeout(silenceTimeout);
       silenceTimeout = setTimeout(() => {
         if (finalTranscript.trim()) {
-          console.log('[VoiceAssessment] Silence detected, sending message:', finalTranscript.trim());
           const messageToSend = finalTranscript.trim();
+          if (messageToSend.length < 2) return;
+
+          console.log('[VoiceAssessment] Sending:', messageToSend);
           finalTranscript = '';
 
-          // Stop recognition before sending
           try {
             recognition.stop();
           } catch (e) {
             // Ignore
           }
-
           sendMessage(messageToSend);
         }
       }, 2000);
