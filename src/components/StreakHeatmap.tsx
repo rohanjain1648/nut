@@ -1,7 +1,8 @@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { format, parseISO, getDay } from "date-fns";
+import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek } from "date-fns";
 import { ActivityData } from "@/hooks/useProgressStats";
+import { useMemo } from "react";
 
 interface StreakHeatmapProps {
     data: ActivityData[];
@@ -9,110 +10,107 @@ interface StreakHeatmapProps {
 }
 
 export const StreakHeatmap = ({ data, isLoading }: StreakHeatmapProps) => {
+    const today = new Date();
+
+    // Generate calendar days for the current month
+    const calendarDays = useMemo(() => {
+        const monthStart = startOfMonth(today);
+        const monthEnd = endOfMonth(today);
+        const startDate = startOfWeek(monthStart); // Default starts on Sunday
+        const endDate = endOfWeek(monthEnd);
+
+        return eachDayOfInterval({ start: startDate, end: endDate });
+    }, []);
+
     if (isLoading) {
         return (
-            <div className="flex gap-1 overflow-x-auto pb-2">
-                {Array.from({ length: 52 }).map((_, i) => (
-                    <div key={i} className="flex flex-col gap-1">
-                        {Array.from({ length: 7 }).map((_, j) => (
-                            <div key={j} className="w-3 h-3 rounded-[2px] bg-muted animate-pulse" />
-                        ))}
-                    </div>
-                ))}
-            </div>
+            <div className="w-full h-48 animate-pulse bg-muted/20 rounded-xl" />
         );
     }
 
-    // The simplified data array already comes in as 365 days in reverse chronological order (or we can assume logic in hook)
-    // But for a calendar heatmap like GitHub's, we usually want column-major order (weeks) starting from Sunday/Monday.
-
-    // Let's reorganize the linear 365 days of data into weeks for rendering.
-    // The hook provides the last 365 days. 
-    // We need to pad the start to align with the first day of the week if necessary.
-
-    const weeks: ActivityData[][] = [];
-    let currentWeek: ActivityData[] = [];
-
-    // We need to reverse the data to start from the oldest date
-    const chronologicalData = [...data].reverse();
-
-    // Find the day of week of the first data point
-    if (chronologicalData.length > 0) {
-        const firstDate = parseISO(chronologicalData[0].date);
-        const startDayOfWeek = getDay(firstDate); // 0 = Sunday
-
-        // Add empty placeholders for days before the start date in the first week
-        for (let i = 0; i < startDayOfWeek; i++) {
-            // We use a dummy date or null marker, but matching the ActivityData shape with level 0 is easier
-            // Just careful not to render tooltips for these
-            currentWeek.push({ date: '', count: 0, level: 0 });
-        }
-    }
-
-    chronologicalData.forEach((day, index) => {
-        currentWeek.push(day);
-
-        // If week is full (7 days) or it's the last item
-        if (currentWeek.length === 7 || index === chronologicalData.length - 1) {
-            weeks.push(currentWeek);
-            currentWeek = [];
-        }
-    });
-
-
-    const getLevelColor = (level: number) => {
-        switch (level) {
-            case 0: return "bg-muted/40"; // No activity
-            case 1: return "bg-green-200 dark:bg-green-900/50"; // Low
-            case 2: return "bg-green-300 dark:bg-green-700/60";
-            case 3: return "bg-green-400 dark:bg-green-500/80";
-            case 4: return "bg-green-500 dark:bg-green-400"; // High (matching user request for green)
-            default: return "bg-muted/40";
-        }
+    // Helper to find activity for a specific day
+    const getActivityForDay = (day: Date) => {
+        const dateStr = format(day, 'yyyy-MM-dd');
+        return data.find(d => d.date === dateStr);
     };
 
+    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
     return (
-        <div className="w-full overflow-x-auto">
-            <div className="flex gap-1 min-w-max pb-2">
-                <TooltipProvider>
-                    {weeks.map((week, weekIndex) => (
-                        <div key={weekIndex} className="flex flex-col gap-1">
-                            {week.map((day, dayIndex) => (
-                                day.date ? (
-                                    <Tooltip key={`${weekIndex}-${dayIndex}`}>
-                                        <TooltipTrigger asChild>
-                                            <div
-                                                className={cn(
-                                                    "w-3 h-3 rounded-[2px] transition-colors hover:ring-2 hover:ring-ring hover:ring-offset-1",
-                                                    getLevelColor(day.level)
-                                                )}
-                                            />
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p className="text-xs font-medium">
-                                                {day.count} {day.count === 1 ? 'exercise' : 'exercises'} on {format(parseISO(day.date), 'MMM d, yyyy')}
-                                            </p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                ) : (
-                                    // Placeholder for empty start days
-                                    <div key={`empty-${weekIndex}-${dayIndex}`} className="w-3 h-3" />
-                                )
-                            ))}
-                        </div>
-                    ))}
-                </TooltipProvider>
-            </div>
-            <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-2">
-                <span>Less</span>
-                <div className="flex gap-1">
-                    <div className="w-3 h-3 rounded-[2px] bg-muted/40" />
-                    <div className="w-3 h-3 rounded-[2px] bg-green-200 dark:bg-green-900/50" />
-                    <div className="w-3 h-3 rounded-[2px] bg-green-300 dark:bg-green-700/60" />
-                    <div className="w-3 h-3 rounded-[2px] bg-green-400 dark:bg-green-500/80" />
-                    <div className="w-3 h-3 rounded-[2px] bg-green-500 dark:bg-green-400" />
+        <div className="w-full flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold font-display">
+                    {format(today, 'MMMM yyyy')}
+                </h3>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-green-500" />
+                        Streak
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-muted" />
+                        No Activity
+                    </span>
                 </div>
-                <span>More</span>
+            </div>
+
+            <div className="grid grid-cols-7 gap-1">
+                {/* Weekday headers */}
+                {weekDays.map(day => (
+                    <div key={day} className="text-center text-xs text-muted-foreground py-2">
+                        {day}
+                    </div>
+                ))}
+
+                {/* Calendar grid */}
+                <TooltipProvider>
+                    {calendarDays.map((date, i) => {
+                        const activity = getActivityForDay(date);
+                        const isCurrentMonth = isSameMonth(date, today);
+                        const isToday = isSameDay(date, today);
+
+                        // Determine styling based on activity
+                        // If there is any count > 0, we treat it as part of the streak/active
+                        const hasActivity = activity && activity.count > 0;
+
+                        return (
+                            <Tooltip key={i}>
+                                <TooltipTrigger asChild>
+                                    <div
+                                        className={cn(
+                                            "aspect-square rounded-md flex items-center justify-center text-sm transition-all",
+                                            !isCurrentMonth && "opacity-30",
+                                            isToday && "ring-2 ring-primary ring-offset-2 ring-offset-background font-bold",
+                                            hasActivity
+                                                ? "bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/50"
+                                                : "bg-muted/30 text-muted-foreground hover:bg-muted/50",
+                                            "cursor-default"
+                                        )}
+                                    >
+                                        <div className="flex flex-col items-center">
+                                            <span>{format(date, 'd')}</span>
+                                            {hasActivity && (
+                                                <div className="w-1 h-1 rounded-full bg-green-500 mt-1" />
+                                            )}
+                                        </div>
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p className="text-xs font-medium">
+                                        {format(date, 'MMM d, yyyy')}
+                                    </p>
+                                    {hasActivity ? (
+                                        <p className="text-xs text-green-500">
+                                            {activity.count} session{activity.count > 1 ? 's' : ''} completed
+                                        </p>
+                                    ) : (
+                                        <p className="text-xs text-muted-foreground">No activity</p>
+                                    )}
+                                </TooltipContent>
+                            </Tooltip>
+                        );
+                    })}
+                </TooltipProvider>
             </div>
         </div>
     );

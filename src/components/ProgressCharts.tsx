@@ -219,7 +219,7 @@ export const ProgressCharts = () => {
               </TabsTrigger>
               <TabsTrigger value="year" className="gap-2">
                 <Flame className="h-4 w-4" />
-                Yearly Activity
+                Streak Calendar
               </TabsTrigger>
             </TabsList>
 

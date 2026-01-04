@@ -19,6 +19,10 @@ const SUPPORTED_LANGUAGES = [
   { code: 'gu', name: 'Gujarati', nativeName: 'ગુજરાતી', googleVoice: 'gu-IN-Standard-A' },
   { code: 'ml', name: 'Malayalam', nativeName: 'മലയാളം', googleVoice: 'ml-IN-Standard-A' },
   { code: 'pa', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', googleVoice: 'pa-IN-Standard-A' },
+  { code: 'fr', name: 'French', nativeName: 'Français', googleVoice: 'fr-FR-Neural2-B' },
+  { code: 'de', name: 'German', nativeName: 'Deutsch', googleVoice: 'de-DE-Neural2-B' },
+  { code: 'es', name: 'Spanish', nativeName: 'Español', googleVoice: 'es-ES-Neural2-B' },
+  { code: 'zh', name: 'Chinese', nativeName: '中文', googleVoice: 'cmn-CN-Standard-D' },
 ];
 
 // Google TTS voice mapping for different assistant personalities
@@ -34,6 +38,10 @@ const VOICE_PERSONALITIES: Record<string, Record<string, string>> = {
     'gu': 'gu-IN-Standard-A',
     'ml': 'ml-IN-Standard-A',
     'pa': 'pa-IN-Standard-A',
+    'fr': 'fr-FR-Neural2-A', // Female
+    'de': 'de-DE-Neural2-A', // Female
+    'es': 'es-ES-Neural2-A', // Female
+    'zh': 'cmn-CN-Standard-A', // Female
   },
   'laura': { // Gentle & Calm - Female
     'en': 'en-US-Neural2-C',
@@ -46,6 +54,10 @@ const VOICE_PERSONALITIES: Record<string, Record<string, string>> = {
     'gu': 'gu-IN-Standard-B',
     'ml': 'ml-IN-Standard-B',
     'pa': 'pa-IN-Standard-B',
+    'fr': 'fr-FR-Neural2-C', // Female
+    'de': 'de-DE-Neural2-C', // Female
+    'es': 'es-ES-Neural2-C', // Female
+    'zh': 'cmn-CN-Standard-B', // Female
   },
   'liam': { // Encouraging - Male
     'en': 'en-US-Neural2-D',
@@ -58,6 +70,10 @@ const VOICE_PERSONALITIES: Record<string, Record<string, string>> = {
     'gu': 'gu-IN-Standard-A',
     'ml': 'ml-IN-Standard-A',
     'pa': 'pa-IN-Standard-A',
+    'fr': 'fr-FR-Neural2-B', // Male
+    'de': 'de-DE-Neural2-B', // Male
+    'es': 'es-ES-Neural2-B', // Male
+    'zh': 'cmn-CN-Standard-C', // Male
   },
   'george': { // Professional - Male
     'en': 'en-US-Neural2-J',
@@ -70,6 +86,11 @@ const VOICE_PERSONALITIES: Record<string, Record<string, string>> = {
     'gu': 'gu-IN-Standard-B',
     'ml': 'ml-IN-Standard-B',
     'pa': 'pa-IN-Standard-B',
+    'fr': 'fr-FR-Neural2-D', // Male, Professional
+    'de': 'de-DE-Neural2-D', // Male, Professional
+    'es': 'es-ES-Neural2-F', // Male (using F as D/E might be missing or different) - verifying standard usually B/other
+    // Using widely available ones:
+    'zh': 'cmn-CN-Standard-D', // Male
   },
 };
 
@@ -288,12 +309,11 @@ serve(async (req) => {
 
   try {
     const GOOGLE_API_KEY = Deno.env.get('GOOGLE_API_KEY');
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!GOOGLE_API_KEY || !LOVABLE_API_KEY) {
-      throw new Error('Required API keys are not configured');
+    if (!GOOGLE_API_KEY) {
+      throw new Error('GOOGLE_API_KEY is not configured');
     }
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
@@ -318,7 +338,7 @@ serve(async (req) => {
       const selectedLanguage = SUPPORTED_LANGUAGES.find(l => l.code === language) || SUPPORTED_LANGUAGES[0];
       const messageCount = messages.length;
       const questionIndex = Math.floor(messageCount / 2);
-      
+
       // Create session on first message
       if (messageCount <= 1 && sessionId) {
         console.log('[VoiceAssessment] Creating session:', sessionId);
@@ -327,7 +347,7 @@ serve(async (req) => {
           .select('id')
           .eq('session_id', sessionId)
           .maybeSingle();
-        
+
         if (!existingSession) {
           const { error: sessionError } = await supabase.from('assessment_sessions').insert({
             session_id: sessionId,
@@ -335,7 +355,7 @@ serve(async (req) => {
             started_at: new Date().toISOString(),
             total_questions: 20,
           });
-          
+
           if (sessionError) {
             console.error('[VoiceAssessment] Session creation error:', sessionError);
           } else {
@@ -345,27 +365,41 @@ serve(async (req) => {
           console.log('[VoiceAssessment] Session already exists');
         }
       }
-      
+
       const isFirstMessage = messages.length <= 1;
       const currentQuestionIndex = Math.floor((messages.length - 1) / 2);
-      
+
       console.log('[VoiceAssessment] isFirstMessage:', isFirstMessage, 'currentQuestionIndex:', currentQuestionIndex);
-      
-      // Call AI to generate response
-      const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
-          messages: [
-            { role: 'system', content: getSystemInstruction(selectedLanguage.name, isFirstMessage, currentQuestionIndex) },
-            ...messages,
-          ],
-        }),
-      });
+
+
+      // Call Google Gemini API directly
+      const systemInstruction = getSystemInstruction(selectedLanguage.name, isFirstMessage, currentQuestionIndex);
+
+      // Convert messages to Gemini format
+      // Gemini expects: { role: 'user' | 'model', parts: [{ text: string }] }
+      // System instruction is passed separately in valid requests or as first message in some endpoints, 
+      // but v1beta/models/gemini-1.5-flash:generateContent supports system_instruction
+
+      const geminiMessages = messages.map((m: any) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
+
+      const aiResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: geminiMessages,
+            system_instruction: {
+              parts: [{ text: systemInstruction }]
+            }
+          }),
+        }
+      );
 
       if (!aiResponse.ok) {
         if (aiResponse.status === 429) {
@@ -374,23 +408,30 @@ serve(async (req) => {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
+        const errorText = await aiResponse.text();
+        console.error('[VoiceAssessment] Gemini API error:', errorText);
         throw new Error('AI gateway error');
       }
 
       const aiData = await aiResponse.json();
-      const assistantText = aiData.choices?.[0]?.message?.content || '';
+      const assistantText = aiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
       console.log('[VoiceAssessment] AI response:', assistantText.substring(0, 100));
 
       // Generate TTS using Google Cloud TTS with selected voice personality
-      const googleLanguageCode = selectedLanguage.code === 'en' ? 'en-US' : `${selectedLanguage.code}-IN`;
-      
+      const googleLanguageCode = selectedLanguage.code === 'en' ? 'en-US' :
+        selectedLanguage.code === 'fr' ? 'fr-FR' :
+          selectedLanguage.code === 'de' ? 'de-DE' :
+            selectedLanguage.code === 'es' ? 'es-ES' :
+              selectedLanguage.code === 'zh' ? 'cmn-CN' :
+                `${selectedLanguage.code}-IN`;
+
       // Get the voice based on selected personality (sarah, laura, liam, george) and language
       const voicePersonality = voiceId?.toLowerCase() || 'sarah';
       const voiceMap = VOICE_PERSONALITIES[voicePersonality] || VOICE_PERSONALITIES['sarah'];
       const googleVoiceName = voiceMap[selectedLanguage.code] || voiceMap['en'] || 'en-US-Neural2-F';
-      
+
       console.log('[VoiceAssessment] Using voice:', voicePersonality, '->', googleVoiceName);
-      
+
       const base64Audio = await generateGoogleTTS(
         assistantText,
         googleLanguageCode,
@@ -400,7 +441,7 @@ serve(async (req) => {
 
       let ttsError = null;
       let ttsProvider = 'none';
-      
+
       if (base64Audio) {
         ttsProvider = 'google';
       } else {
@@ -408,32 +449,32 @@ serve(async (req) => {
       }
 
       // Check if assessment is complete
-      const isComplete = messageCount >= 40 || 
-                        assistantText.toLowerCase().includes('would you like to see your') ||
-                        (assistantText.toLowerCase().includes('report') && messageCount >= 38);
+      const isComplete = messageCount >= 40 ||
+        assistantText.toLowerCase().includes('would you like to see your') ||
+        (assistantText.toLowerCase().includes('report') && messageCount >= 38);
 
       // Analyze sentiment
       let sentiment = 0;
       const lastUserMessage = messages.filter((m: any) => m.role === 'user').pop()?.content?.toLowerCase() || '';
-      
+
       const positiveWords = ['good', 'great', 'well', 'fine', 'okay', 'better', 'easy', 'rarely', 'sometimes'];
       const negativeWords = ['bad', 'hard', 'difficult', 'struggle', 'always', 'never', 'terrible', 'awful', 'constantly', 'often'];
-      
+
       const posCount = positiveWords.filter(w => lastUserMessage.includes(w)).length;
       const negCount = negativeWords.filter(w => lastUserMessage.includes(w)).length;
-      
+
       if (posCount > negCount) sentiment = 1;
       else if (negCount > posCount) sentiment = -1;
 
       // Store user response in assessment_responses
       const userMessages = messages.filter((m: any) => m.role === 'user');
       const userMessageCount = userMessages.length;
-      
+
       if (sessionId && userMessageCount >= 2) {
         const userResponse = userMessages[userMessages.length - 1]?.content || '';
         const answerQuestionIndex = userMessageCount - 2;
         const currentQuestion = ASSESSMENT_QUESTIONS[answerQuestionIndex];
-        
+
         if (currentQuestion && userResponse && userResponse.toLowerCase() !== 'start the assessment') {
           let emotionDetected = 'neutral';
           if (sentiment === 1) emotionDetected = 'positive';
@@ -452,7 +493,7 @@ serve(async (req) => {
             emotion_detected: emotionDetected,
             sentiment_score: sentiment,
           });
-          
+
           if (responseError) {
             console.error('[VoiceAssessment] Response save error:', responseError);
           }
@@ -463,14 +504,14 @@ serve(async (req) => {
       if (isComplete && sessionId) {
         await supabase
           .from('assessment_sessions')
-          .update({ 
+          .update({
             status: 'completed',
             completed_at: new Date().toISOString(),
           })
           .eq('session_id', sessionId);
       }
 
-      return new Response(JSON.stringify({ 
+      return new Response(JSON.stringify({
         text: assistantText,
         audioContent: base64Audio,
         isComplete,
@@ -485,37 +526,43 @@ serve(async (req) => {
 
     // Generate report
     if (action === 'generate_report') {
-      const reportResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
-          messages: [
-            { 
-              role: 'system', 
-              content: `You are a mental health assessment analyzer. Based on the conversation transcript provided, generate a structured report with:
+      const reportResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              role: 'user',
+              parts: [{
+                text: `You are a mental health assessment analyzer. Based on the conversation transcript provided, generate a structured report with:
 1. Overall observation
 2. Key patterns identified
 3. Areas of strength
 4. Areas of concern
 5. Recommendations
 
-Be empathetic and non-diagnostic. Use professional but accessible language.` 
-            },
-            { role: 'user', content: `Analyze this assessment conversation and provide a report:\n\n${JSON.stringify(messages)}` },
-          ],
-        }),
-      });
+Be empathetic and non-diagnostic. Use professional but accessible language.
+
+Analyze this assessment conversation and provide a report:
+
+${JSON.stringify(messages)}`
+              }]
+            }]
+          }),
+        }
+      );
 
       if (!reportResponse.ok) {
+        const errorText = await reportResponse.text();
+        console.error('[VoiceAssessment] Report generation error:', errorText);
         throw new Error('Failed to generate report');
       }
 
       const reportData = await reportResponse.json();
-      const report = reportData.choices?.[0]?.message?.content || 'Unable to generate report';
+      const report = reportData.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate report';
 
       return new Response(JSON.stringify({ report }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

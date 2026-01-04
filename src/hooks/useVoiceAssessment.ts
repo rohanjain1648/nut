@@ -333,7 +333,11 @@ export const useVoiceAssessment = () => {
                 selectedLanguage?.code === 'mr' ? 'mr-IN' :
                   selectedLanguage?.code === 'gu' ? 'gu-IN' :
                     selectedLanguage?.code === 'ml' ? 'ml-IN' :
-                      selectedLanguage?.code === 'pa' ? 'pa-IN' : 'en-US';
+                      selectedLanguage?.code === 'pa' ? 'pa-IN' :
+                        selectedLanguage?.code === 'fr' ? 'fr-FR' :
+                          selectedLanguage?.code === 'de' ? 'de-DE' :
+                            selectedLanguage?.code === 'es' ? 'es-ES' :
+                              selectedLanguage?.code === 'zh' ? 'zh-CN' : 'en-US';
 
     console.log('[VoiceAssessment] Recognition language:', recognition.lang);
 
@@ -503,7 +507,9 @@ export const useVoiceAssessment = () => {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to start session');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[VoiceAssessment] Session start failed:', response.status, errorData);
+        throw new Error(errorData.error || `Failed to start session (${response.status})`);
       }
 
       const data = await response.json();
