@@ -168,6 +168,16 @@ export const EXERCISE_LIBRARY: Exercise[] = [
     steps: brainDumpSteps,
     ambientSound: 'nature',
   },
+  {
+    id: 'zen-breathing',
+    title: 'Zen Particles',
+    description: 'Immersive 3D breathing exercise with mood-based visualizations and OM chanting.',
+    type: 'breathing',
+    duration: 5,
+    icon: 'Sparkles',
+    steps: [], // Zen mode handles its own steps
+    ambientSound: 'silence', // Zen mode handles its own audio
+  },
 ];
 
 export const getExerciseById = (id: string): Exercise | undefined => {

@@ -1,21 +1,22 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  Heart, 
-  Clock, 
-  Trophy, 
-  Wind, 
-  Target, 
-  Lightbulb, 
-  TreePine, 
+import {
+  ArrowLeft,
+  Heart,
+  Clock,
+  Trophy,
+  Wind,
+  Target,
+  Lightbulb,
+  TreePine,
   Waves,
   Moon,
   Play,
   Star,
   CheckCircle2,
-  Flame
+  Flame,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,6 +37,7 @@ const exerciseIcons: Record<string, React.ComponentType<{ className?: string }>>
   TreePine,
   Waves,
   Moon,
+  Sparkles
 };
 
 const exerciseRoutes: Record<string, string> = {
@@ -44,6 +46,7 @@ const exerciseRoutes: Record<string, string> = {
   'body-scan': '/body-scan',
   'task-anchoring': '/task-anchoring',
   'brain-dump': '/brain-dump',
+  'zen-breathing': '/zen-breathing',
 };
 
 const typeColors: Record<string, string> = {
@@ -63,16 +66,16 @@ interface ExerciseCardProps {
   onStart: () => void;
 }
 
-const ExerciseCard = ({ 
-  exercise, 
-  completionCount, 
-  lastCompleted, 
-  isFavorite, 
+const ExerciseCard = ({
+  exercise,
+  completionCount,
+  lastCompleted,
+  isFavorite,
   onToggleFavorite,
-  onStart 
+  onStart
 }: ExerciseCardProps) => {
   const Icon = exerciseIcons[exercise.icon] || Wind;
-  
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -87,10 +90,9 @@ const ExerciseCard = ({
           }}
           className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-background/80 hover:bg-background transition-colors"
         >
-          <Heart 
-            className={`h-4 w-4 transition-colors ${
-              isFavorite ? 'fill-red-500 text-red-500' : 'text-muted-foreground hover:text-red-400'
-            }`}
+          <Heart
+            className={`h-4 w-4 transition-colors ${isFavorite ? 'fill-red-500 text-red-500' : 'text-muted-foreground hover:text-red-400'
+              }`}
           />
         </button>
 
@@ -106,9 +108,8 @@ const ExerciseCard = ({
 
         <CardHeader className="pt-10" onClick={onStart}>
           <div className="flex items-start gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-              typeColors[exercise.type]?.replace('text-', 'bg-').split(' ')[0] || 'bg-primary/20'
-            }`}>
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${typeColors[exercise.type]?.replace('text-', 'bg-').split(' ')[0] || 'bg-primary/20'
+              }`}>
               <Icon className={`h-6 w-6 ${typeColors[exercise.type]?.split(' ')[1] || 'text-primary'}`} />
             </div>
             <div className="flex-1">
@@ -128,7 +129,7 @@ const ExerciseCard = ({
 
         <CardContent onClick={onStart}>
           <CardDescription className="mb-4">{exercise.description}</CardDescription>
-          
+
           {lastCompleted && (
             <p className="text-xs text-muted-foreground mb-3">
               Last completed {formatDistanceToNow(lastCompleted, { addSuffix: true })}
@@ -148,12 +149,12 @@ const ExerciseCard = ({
 export default function ToolkitPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
-  const { 
-    exercises, 
-    stats, 
-    favorites, 
-    totalCompletions, 
-    isLoading, 
+  const {
+    exercises,
+    stats,
+    favorites,
+    totalCompletions,
+    isLoading,
     toggleFavorite,
     getExerciseStats
   } = useExerciseTracker();
@@ -235,7 +236,7 @@ export default function ToolkitPage() {
         {/* Reminder/Completed Banner */}
         <AnimatePresence>
           {reminders.shouldShowReminder && !hasCompletedToday && (
-            <ReminderBanner 
+            <ReminderBanner
               onDismiss={reminders.dismissReminder}
               onStartExercise={handleStartQuickExercise}
             />
@@ -304,20 +305,20 @@ export default function ToolkitPage() {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full flex h-auto gap-2 bg-transparent mb-6">
-            <TabsTrigger 
+            <TabsTrigger
               value="all"
               className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
               All Exercises
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="favorites"
               className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
               <Heart className="h-4 w-4 mr-2" />
               Favorites
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="recent"
               className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
@@ -355,12 +356,12 @@ export default function ToolkitPage() {
                   {activeTab === 'favorites' ? 'No favorites yet' : 'No recent exercises'}
                 </h3>
                 <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                  {activeTab === 'favorites' 
+                  {activeTab === 'favorites'
                     ? 'Tap the heart icon on any exercise to add it to your favorites for quick access.'
                     : 'Complete an exercise to see it in your recent history.'}
                 </p>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="mt-4"
                   onClick={() => setActiveTab('all')}
                 >
@@ -397,7 +398,7 @@ export default function ToolkitPage() {
             <div className="flex-1">
               <h4 className="font-semibold text-foreground mb-1">Pro Tip</h4>
               <p className="text-muted-foreground text-sm">
-                Consistency beats intensity. Even a 3-minute grounding exercise done daily 
+                Consistency beats intensity. Even a 3-minute grounding exercise done daily
                 is more effective than occasional longer sessions.
               </p>
             </div>
